@@ -11,7 +11,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 
 - [x] **Phase 1:** Environment & Project Scaffolding
 - [x] **Phase 2:** Database Schema & Migration
-- [ ] **Phase 3:** Authentication, Security & User Profile
+- [x] **Phase 3:** Authentication, Security & User Profile
 - [ ] **Phase 4:** TMDB Integration & Local Title Caching
 - [ ] **Phase 5:** Matching Engine & Misery Algorithm
 - [ ] **Phase 6:** Groq LLM Concurrent Integration
@@ -81,27 +81,27 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 ---
 
 ## Phase 3: Auth & Profile
-- [ ] Build stateless `JwtTokenProvider` (24-hour expiration) and `JwtAuthenticationFilter`.
-- [ ] Build global `RestExceptionHandler` returning standardized error envelope: `{"error": {"code": "...", "message": "..."}}`.
-- [ ] Implement `POST /auth/signup`:
-  - [ ] Hash password using BCrypt.
-  - [ ] Check unique email (`409 EMAIL_ALREADY_REGISTERED`).
-  - [ ] Return signed JWT and user object (`201 Created`).
-- [ ] Implement `POST /auth/login`:
-  - [ ] Verify credentials (`401 INVALID_CREDENTIALS`).
-  - [ ] Return signed JWT and user object (`200 OK`).
-- [ ] Implement `POST /auth/forgot-password`:
-  - [ ] Generate single-use secure token with 30-min expiry.
-  - [ ] Dispatch email via `JavaMailSender` (or log link if SMTP not configured).
-  - [ ] Return uniform message to prevent email enumeration.
-- [ ] Implement `POST /auth/reset-password`:
-  - [ ] Verify token and expiry (`410 RESET_TOKEN_EXPIRED`, `400 RESET_TOKEN_INVALID`).
-  - [ ] Update password and mark token used.
-- [ ] Implement `GET /profile`:
-  - [ ] Return user profile merged with account display name and email.
-- [ ] Implement `PUT /profile`:
-  - [ ] Validate bounds (max 5 favorite genres, max 5 loved titles, non-empty languages).
-  - [ ] Upsert `user_profiles` row.
+- [x] Build stateless `JwtTokenProvider` (24-hour expiration) and `JwtAuthenticationFilter`.
+- [x] Build global `RestExceptionHandler` returning standardized error envelope: `{"error": {"code": "...", "message": "..."}}`.
+- [x] Implement `POST /auth/signup`:
+  - [x] Hash password using BCrypt.
+  - [x] Check unique email (`409 EMAIL_ALREADY_REGISTERED`).
+  - [x] Return signed JWT and user object (`201 Created`).
+- [x] Implement `POST /auth/login`:
+  - [x] Verify credentials (`401 INVALID_CREDENTIALS`).
+  - [x] Return signed JWT and user object (`200 OK`).
+- [x] Implement `POST /auth/forgot-password`:
+  - [x] Generate single-use secure token with 30-min expiry.
+  - [x] Dispatch email via `JavaMailSender` (or log link if SMTP not configured).
+  - [x] Return uniform message to prevent email enumeration.
+- [x] Implement `POST /auth/reset-password`:
+  - [x] Verify token and expiry (`410 RESET_TOKEN_EXPIRED`, `400 RESET_TOKEN_INVALID`).
+  - [x] Update password and mark token used.
+- [x] Implement `GET /profile`:
+  - [x] Return user profile merged with account display name and email.
+- [x] Implement `PUT /profile`:
+  - [x] Validate bounds (max 5 favorite genres, max 5 loved titles, non-empty languages).
+  - [x] Upsert `user_profiles` row.
 
 ---
 
