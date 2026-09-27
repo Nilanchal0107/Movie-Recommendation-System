@@ -10,7 +10,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 ## Progress Overview
 
 - [x] **Phase 1:** Environment & Project Scaffolding
-- [ ] **Phase 2:** Database Schema & Migration
+- [x] **Phase 2:** Database Schema & Migration
 - [ ] **Phase 3:** Authentication, Security & User Profile
 - [ ] **Phase 4:** TMDB Integration & Local Title Caching
 - [ ] **Phase 5:** Matching Engine & Misery Algorithm
@@ -50,33 +50,33 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 ---
 
 ## Phase 2: Database Schema & Entity Modelling
-- [ ] Create MySQL database `movie_recommender`.
-- [ ] Create database initialization script (`schema.sql`) for all 10 tables:
-  - [ ] `users`
-  - [ ] `user_profiles`
-  - [ ] `password_reset_tokens`
-  - [ ] `genres`
-  - [ ] `keywords`
-  - [ ] `titles`
-  - [ ] `sessions`
-  - [ ] `session_person_answers`
-  - [ ] `session_results`
-  - [ ] `session_result_person_scores`
-- [ ] Implement JPA Entities and AttributeConverters for JSON column mapping:
-  - [ ] `User.java`
-  - [ ] `UserProfile.java` (languages, favorite_genres, never_want_genres, loved_title_ids)
-  - [ ] `PasswordResetToken.java`
-  - [ ] `Genre.java`
-  - [ ] `Keyword.java` (flags: `is_intensity_marker`)
-  - [ ] `Title.java` (`certification_band` indexed column, `genre_ids`, `keyword_ids`, `cast` top 5)
-  - [ ] `Session.java`
-  - [ ] `SessionPersonAnswer.java` (moods, genres_up_for, hard_no_genres, languages_ok)
-  - [ ] `SessionResult.java`
-  - [ ] `SessionResultPersonScore.java`
-- [ ] Seed initial lookup tables:
-  - [ ] Marker intensity keywords: `graphic violence`, `gore`, `sexual violence`, `torture`
-  - [ ] Mood proxy keywords: `horror`, `romance` for TV series
-  - [ ] Standard TMDB movie and TV genres
+- [x] Create MySQL database `movie_recommender`.
+- [x] Create database initialization script (`schema.sql`) for all 10 tables:
+  - [x] `users`
+  - [x] `user_profiles`
+  - [x] `password_reset_tokens`
+  - [x] `genres`
+  - [x] `keywords`
+  - [x] `titles`
+  - [x] `sessions`
+  - [x] `session_person_answers`
+  - [x] `session_results`
+  - [x] `session_result_person_scores`
+- [x] Implement JPA Entities and AttributeConverters for JSON column mapping:
+  - [x] `User.java`
+  - [x] `UserProfile.java` (languages, favorite_genres, never_want_genres, loved_title_ids)
+  - [x] `PasswordResetToken.java`
+  - [x] `Genre.java`
+  - [x] `Keyword.java` (flags: `is_intensity_marker`)
+  - [x] `Title.java` (`certification_band` indexed column, `genre_ids`, `keyword_ids`, `cast` top 5)
+  - [x] `Session.java`
+  - [x] `SessionPersonAnswer.java` (moods, genres_up_for, hard_no_genres, languages_ok)
+  - [x] `SessionResult.java`
+  - [x] `SessionResultPersonScore.java`
+- [x] Seed initial lookup tables:
+  - [x] Marker intensity keywords: `graphic violence`, `gore`, `sexual violence`, `torture`
+  - [x] Mood proxy keywords: `horror`, `romance` for TV series
+  - [x] Standard TMDB movie and TV genres
 
 ---
 
