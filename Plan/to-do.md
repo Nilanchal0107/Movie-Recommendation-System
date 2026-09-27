@@ -12,7 +12,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 1:** Environment & Project Scaffolding
 - [x] **Phase 2:** Database Schema & Migration
 - [x] **Phase 3:** Authentication, Security & User Profile
-- [ ] **Phase 4:** TMDB Integration & Local Title Caching
+- [x] **Phase 4:** TMDB Integration & Local Title Caching
 - [ ] **Phase 5:** Matching Engine & Misery Algorithm
 - [ ] **Phase 6:** Groq LLM Concurrent Integration
 - [ ] **Phase 7:** Frontend Design System & Common UI
@@ -106,23 +106,23 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 ---
 
 ## Phase 4: External Integrations & Local Title Caching
-- [ ] Implement `TmdbClient` using WebClient with `TMDB_API_KEY`:
-  - [ ] Search multi / movies / series.
-  - [ ] Discover movies and series with genres, certifications, and languages.
-  - [ ] Detail endpoint with `append_to_response=release_dates,content_ratings,credits,keywords`.
-- [ ] Implement Indian certification hierarchy parser and US fallback:
-  - [ ] Map Indian ratings (`U`, `UA 7+`, `UA 13+` / `UA`, `UA 16+`, `A`) to internal bands (`U`, `UA7`, `UA13`, `UA16`, `A`).
-  - [ ] Map US fallback ratings (Movies: `G`, `PG`, `PG-13`, `R`/`NC-17`; TV: `TV-Y`, `TV-PG`, `TV-14`, `TV-MA`).
-  - [ ] Assign `null` / `"Not rated"` if neither is found.
-- [ ] Address Forms Spec Data Traps:
-  - [ ] *Runtime Trap:* Store parsed runtime locally and filter in SQL/memory rather than trusting TMDB Discover.
-  - [ ] *Series Age Trap:* Discover TV has no age filter; fetch content ratings and filter locally.
-- [ ] Implement `GET /genres` endpoint (cached from TMDB).
-- [ ] Implement `POST /titles/search`:
-  - [ ] Query TMDB by title query and media type.
-  - [ ] Immediately upsert returned titles with basic info (id, tmdbId, title, poster, year) into MySQL.
-- [ ] Implement `GET /titles/{id}`:
-  - [ ] Return complete title details, top 5 cast, ratings, and certifications.
+- [x] Implement `TmdbClient` using WebClient with `TMDB_API_KEY`:
+  - [x] Search multi / movies / series.
+  - [x] Discover movies and series with genres, certifications, and languages.
+  - [x] Detail endpoint with `append_to_response=release_dates,content_ratings,credits,keywords`.
+- [x] Implement Indian certification hierarchy parser and US fallback:
+  - [x] Map Indian ratings (`U`, `UA 7+`, `UA 13+` / `UA`, `UA 16+`, `A`) to internal bands (`U`, `UA7`, `UA13`, `UA16`, `A`).
+  - [x] Map US fallback ratings (Movies: `G`, `PG`, `PG-13`, `R`/`NC-17`; TV: `TV-Y`, `TV-PG`, `TV-14`, `TV-MA`).
+  - [x] Assign `null` / `"Not rated"` if neither is found.
+- [x] Address Forms Spec Data Traps:
+  - [x] *Runtime Trap:* Store parsed runtime locally and filter in SQL/memory rather than trusting TMDB Discover.
+  - [x] *Series Age Trap:* Discover TV has no age filter; fetch content ratings and filter locally.
+- [x] Implement `GET /genres` endpoint (cached from TMDB).
+- [x] Implement `POST /titles/search`:
+  - [x] Query TMDB by title query and media type.
+  - [x] Immediately upsert returned titles with basic info (id, tmdbId, title, poster, year) into MySQL.
+- [x] Implement `GET /titles/{id}`:
+  - [x] Return complete title details, top 5 cast, ratings, and certifications.
 
 ---
 
