@@ -13,7 +13,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 2:** Database Schema & Migration
 - [x] **Phase 3:** Authentication, Security & User Profile
 - [x] **Phase 4:** TMDB Integration & Local Title Caching
-- [ ] **Phase 5:** Matching Engine & Misery Algorithm
+- [x] **Phase 5:** Matching Engine & Misery Algorithm
 - [ ] **Phase 6:** Groq LLM Concurrent Integration
 - [ ] **Phase 7:** Frontend Design System & Common UI
 - [ ] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
@@ -127,36 +127,38 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 ---
 
 ## Phase 5: Matching Engine & Misery Algorithm
-- [ ] Build hard filter candidate query:
-  - [ ] Age limit: `certification_band <= youngestPersonAgeBand` (or unrated).
-  - [ ] Language: `original_language` in group's common intersection of `languages_ok`.
-  - [ ] Hard-no genres: title's `genre_ids` contains none of any attendee's `hard_no_genres`.
-  - [ ] Q7 Intensity check:
+- [x] Build hard filter candidate query:
+  - [x] Age limit: `certification_band <= youngestPersonAgeBand` (or unrated). *(Fixed a pre-existing bug: `certificationBand` is a String-converted enum, so JPQL `<=` compared lexicographically; `TitleRepository.findCandidates` now takes an explicit `List<CertificationBand>` of allowed bands computed by ordinal instead.)*
+  - [x] Language: `original_language` in group's common intersection of `languages_ok`.
+  - [x] Hard-no genres: title's `genre_ids` contains none of any attendee's `hard_no_genres` (matched by genre name, so it works across movie/series genre-id spaces for `Either` sessions).
+  - [x] Q7 Intensity check:
     - If anyone selected `light`: exclude titles with any intensity marker keywords.
     - If anyone selected `intense`: require title to have at least one intensity marker keyword.
-  - [ ] Runtime filter: match movie runtime bracket or series duration/status.
-  - [ ] Replenish candidate pool from TMDB Discover if local cached pool < 50 items.
-- [ ] Build per-person scoring function (0–100 scale):
-  - [ ] Genre match (Weight 35)
-  - [ ] Mood-to-genre/keyword match (Weight 25)
-  - [ ] Light / intense slider alignment (Weight 15)
-  - [ ] Similarity to `something_like_title_id` / profile `loved_title_ids` (Weight 15)
-  - [ ] Era preference match (Weight 10)
-- [ ] Implement solo mode:
-  - [ ] Automatically calculate age band from `current_year - birth_year`.
-  - [ ] Pre-fill answers from user profile.
-- [ ] Implement "Average without Misery" algorithm:
-  - [ ] Initial misery threshold = 40.
-  - [ ] Filter out candidates where `min(person_score) < threshold`.
-  - [ ] Calculate `group_score = avg(person_scores) + (vote_average * 0.5)`.
-  - [ ] If < 5 titles survive: retry with threshold 30; if still < 5, retry with threshold 20.
-  - [ ] Mark lowered-threshold titles with badge `compromise`.
-  - [ ] Select top 5 surviving candidates.
-- [ ] Implement Session Endpoints:
-  - [ ] `POST /sessions/start`: validate S1–S4 and create `sessions` record.
-  - [ ] `POST /sessions/{id}/submit`: persist all attendee Q1–Q8 answers, execute matching, trigger Groq explanations, save `session_results` & `session_result_person_scores`, return rank 1–5.
-  - [ ] `POST /sessions/{id}/more`: re-run matching excluding prior `title_id`s, invoke Groq for next 5, save and return rank 6–10.
-  - [ ] `GET /sessions/{id}/results`: return existing session results (for page refresh).
+  - [x] Runtime filter: movie runtime bracket (hard cap) and series duration/status (finished vs ongoing, episode length) from `session.timeLimit`.
+  - [x] Replenish candidate pool from TMDB Discover if local cached pool < 50 items (`TitleCacheService.discoverAndCache`).
+- [x] Build per-person scoring function (0–100 scale) in `MatchingEngineService`:
+  - [x] Genre match (Weight 35)
+  - [x] Mood-to-genre/keyword match (Weight 25)
+  - [x] Light / intense slider alignment (Weight 15) — always full marks for survivors since Q7 is enforced as a hard filter above.
+  - [x] Similarity to `something_like_title_id`, falling back to the host's profile `loved_title_ids` when Q8 is skipped (Weight 15)
+  - [x] Era preference match (Weight 10) — host only, from profile `era_preference` (no era field exists per-person in the API contract).
+- [x] Implement solo mode:
+  - [x] Automatically calculate age band from `current_year - birth_year` (`AgeBandMapper`), applied to `personIndex 0` regardless of group size.
+  - [x] Pre-fill answers from user profile — n/a on the backend beyond the age-band override; the wizard pre-fill itself is a Phase 8/9 frontend concern.
+- [x] Implement "Average without Misery" algorithm:
+  - [x] Initial misery threshold = 40.
+  - [x] Filter out candidates where `min(person_score) < threshold`.
+  - [x] Calculate `group_score = avg(person_scores) + (vote_average * 0.5)`.
+  - [x] If < 5 titles survive: retry with threshold 30; if still < 5, retry with threshold 20.
+  - [x] Mark lowered-threshold titles with badge `compromise`.
+  - [x] Select top 5 surviving candidates.
+- [x] Implement Session Endpoints:
+  - [x] `POST /sessions/start`: validate S1–S4 and create `sessions` record.
+  - [x] `POST /sessions/{id}/submit`: persist all attendee Q1–Q8 answers, execute matching, save `session_results` & `session_result_person_scores`, return rank 1–5. `aiExplanation` is a programmatic placeholder one-liner until Phase 6 wires up `GroqClient`.
+  - [x] `POST /sessions/{id}/more`: re-run matching excluding prior `title_id`s, save and return rank 6–10.
+  - [x] `GET /sessions/{id}/results`: return existing session results (for page refresh).
+
+Note: real Groq explanations are Phase 6's job; `aiExplanation` currently returns a generic templated line, which also happens to be exactly the `GROQ_UNREACHABLE` fallback behavior the TRD asks for.
 
 ---
 

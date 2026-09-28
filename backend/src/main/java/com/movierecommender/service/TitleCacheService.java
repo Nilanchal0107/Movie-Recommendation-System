@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Caches TMDB titles in MySQL. Search results are upserted with minimal fields immediately
@@ -40,6 +41,19 @@ public class TitleCacheService {
         List<Title> results = new ArrayList<>();
         for (JsonNode result : response.path("results")) {
             results.add(upsertBasic(result, mediaType));
+        }
+        return results;
+    }
+
+    /** Replenishes the local cache from TMDB Discover with the given filter params, upserting full details so the results are immediately usable as match candidates. */
+    @Transactional
+    public List<Title> discoverAndCache(MediaType mediaType, Map<String, String> params) {
+        JsonNode response = mediaType == MediaType.MOVIE ? tmdbClient.discoverMovies(params) : tmdbClient.discoverTv(params);
+        List<Title> results = new ArrayList<>();
+        for (JsonNode r : response.path("results")) {
+            Title title = upsertBasic(r, mediaType);
+            fetchFullDetails(title);
+            results.add(title);
         }
         return results;
     }
