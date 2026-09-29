@@ -55,7 +55,8 @@ export default function ResultsPage() {
     setMoreError('')
     getMoreResults(sessionId)
       .then((res) => {
-        setData((prev) => (prev ? { ...prev, results: [...prev.results, ...res.results] } : res))
+        // /more returns the full accumulated result list (same as GET /results), not just the new batch
+        setData(res)
         setShowMoreDone(true)
       })
       .catch((err) => setMoreError(err instanceof ApiError ? err.message : 'Could not load more picks.'))

@@ -15,11 +15,11 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 4:** TMDB Integration & Local Title Caching
 - [x] **Phase 5:** Matching Engine & Misery Algorithm
 - [x] **Phase 6:** Groq LLM Concurrent Integration
-- [ ] **Phase 7:** Frontend Design System & Common UI
+- [x] **Phase 7:** Frontend Design System & Common UI
 - [x] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
 - [x] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
 - [x] **Phase 10:** Frontend Flows 8–9 (Results & Title Detail)
-- [ ] **Phase 11:** End-to-End Integration, Edge Cases & Verification
+- [~] **Phase 11:** End-to-End Integration, Edge Cases & Verification (5/6 items verified; keyboard navigation needs a live browser pass — see notes)
 
 ---
 
@@ -171,17 +171,19 @@ Note: real Groq explanations are Phase 6's job; `aiExplanation` currently return
 ---
 
 ## Phase 7: Frontend Design System & Components
-- [ ] Implement shared UI components in `/frontend/src/components`:
-  - [ ] `Button`: primary gold `#E5A00D`, secondary outline, loading state, disabled styling.
-  - [ ] `Chip`: multi-select and single-select chips with gold checkmarks and keyboard toggle.
-  - [ ] `TextInput`: accessible text input with floating label / error display.
-  - [ ] `Stepper`: `[ - ] count [ + ]` for group size (1 to 8).
-  - [ ] `Slider3Step`: 3-stop slider for Q7 (Light, Balanced, Intense).
-  - [ ] `TitleSearchPicker`: debounced search input with poster preview chips and remove button.
-  - [ ] `PersonScoreCircles`: colored attendee initials (`#3DD68C` green for 70+, `#F5A524` amber for 40–69).
-  - [ ] `FilmReelSpinner`: animated film-reel loading spinner.
-  - [ ] `Navbar`: title, user avatar/name dropdown, Edit profile link, Log out button.
-- [ ] Setup API client with token interceptor and standardized error handling.
+- [x] Implement shared UI components in `/frontend/src/components`:
+  - [x] `Button`: primary gold `#E5A00D`, secondary outline, loading state, disabled styling.
+  - [x] `Chip`: multi-select and single-select chips with gold checkmarks and keyboard toggle.
+  - [x] `TextInput`: accessible text input with floating label / error display.
+  - [x] `Stepper`: `[ - ] count [ + ]` for group size (1 to 8).
+  - [x] `Slider3Step`: 3-stop slider for Q7 (Light, Balanced, Intense).
+  - [x] `TitleSearchPicker`: debounced search input with poster preview chips and remove button.
+  - [x] `PersonScoreCircles`: colored attendee initials (`#3DD68C` green for 70+, `#F5A524` amber for 40–69).
+  - [x] `FilmReelSpinner`: animated film-reel loading spinner.
+  - [x] `Navbar`: title, user avatar/name dropdown, Edit profile link, Log out button.
+- [x] Setup API client with token interceptor and standardized error handling.
+
+This phase's checkbox was simply never ticked — all of the above were already built and in use by Phases 8–10 (`frontend/src/components/*.tsx`, `frontend/src/api/client.ts`); confirmed present during the Phase 11 pass.
 
 ---
 
@@ -261,9 +263,15 @@ Also added: `getMoreResults`/`getSessionResults` to `api/sessions.ts` and `getTi
 ---
 
 ## Phase 11: Testing & Refinement
-- [ ] **Keyboard Navigation:** Validate complete session walkthrough using Tab, Enter, Space, and Arrow keys.
-- [ ] **Solo Mode Flow:** Validate profile pre-fill, Q1/Q2 bypass, and results generation.
-- [ ] **Group Mode Flow:** Validate 3+ person session with conflicting tastes and minors (CBFC filtering).
-- [ ] **Compromise Logic:** Test restrictive filters forcing misery threshold reduction (40 -> 30 -> 20) with compromise badge display.
-- [ ] **Resilience:** Validate graceful fallback when TMDB or Groq is unreachable.
-- [ ] **Production Build Check:** Execute `mvn clean package` and `npm run build` cleanly without warnings or errors.
+- [ ] **Keyboard Navigation:** Validate complete session walkthrough using Tab, Enter, Space, and Arrow keys. *Not verified live — this sandbox has no browser automation tool. Code-level check only: `onKeyDown`/`autoFocus`/`tabIndex`/ARIA hooks exist in `Chip`, `Stepper`, `Slider3Step`, `HandoffPage` (autofocused "I'm ready"), `TitleDetailPage` (Esc → back). Needs a real-browser pass (manual or a Playwright/browser-tool session) before shipping.*
+- [x] **Solo Mode Flow:** Validated end-to-end against the real running backend (`POST /sessions/start` → `/submit` → `GET /results` → `/more`): single-person scoring, refresh-safe re-fetch, and rank 6–10 exclude rank 1–5.
+- [x] **Group Mode Flow:** Validated a 3-person session with an adult + a 13–15 minor + conflicting genre/mood preferences: certification-band filtering correctly capped all results to the minor's ceiling (no `A`-band titles leaked in), confirmed against a control session (no minor) where `A`-band titles were eligible.
+- [x] **Compromise Logic:** Forced genre/mood/era mismatches down to a uniform sub-40 score and confirmed the engine retries at threshold 30 and marks survivors `badge: "compromise"` — the 40→30→20 ladder works as designed.
+- [x] **Resilience:** TMDB is genuinely unreachable from this dev sandbox (confirmed: `curl` to `api.themoviedb.org` times out while other hosts succeed) — every `/submit` call against an empty/undersized local cache correctly returned `502 TMDB_UNREACHABLE` per the error envelope, so that fallback path got real (not simulated) coverage. Groq fallback also got real coverage, but for an unplanned reason — see finding below.
+- [x] **Production Build Check:** `npm run build` (tsc -b && vite build) is clean. `mvn clean package` **fails on JDK 26** (`ExceptionInInitializerError: TypeTag :: UNKNOWN` — a Lombok/very-new-javac incompatibility exposed once `clean` removes the stale cached classes the dev server had been running on) but **succeeds cleanly, tests included**, on JDK 23. No JDK 21 (the version this project targets, per `pom.xml` and `CLAUDE.md`) is installed on this machine at all — only 8, 17, 23, and 26. Build with JDK 17–23 until Lombok ships JDK 26 support, or install a JDK 21 to match the pinned target exactly.
+
+**Findings from this pass** (surfaced by testing, not fixed blindly — these are either judgment calls or pre-existing documented design, so flagged instead of silently changed):
+1. **Fixed:** `ResultsPage.tsx`'s "Show more" handler was concatenating `/more`'s response onto the existing 5 results. The backend's `/more` (`SessionService.more()` → `buildResponse()`) already returns the *full* accumulated list (ranks 1–10, same contract as `GET /results`) — so appending it duplicated the first 5 cards. Now replaces `data` with the response instead of merging.
+2. **Not fixed, flagged:** `MatchingEngineService.passesGenreAndIntensity` applies Q7 as a **hard** filter unioned across every attendee: `anyLight` excludes any title with an intensity-marker keyword, `anyIntense` requires one. If a group has both a "Light" and an "Intense" answer (plausible in any real 3+ person group), these two conditions are mutually exclusive for every title — the session **always** returns zero results, regardless of misery threshold. This is the documented Phase 5 design (see this file's git history / the bullet above), not an accident, but it means "conflicting tastes" groups can hard-fail in a way the misery-threshold/compromise mechanism can't rescue. Worth a product call: soften Q7 into per-person scoring like the other weighted signals, or keep it a hard filter and surface a clearer "your group's intensity picks cancel out" message instead of the generic empty state.
+3. **Not fixed, flagged:** `SessionService.resolveBadge()` gives `NOT_RATED` precedence over `COMPROMISE` — an unrated compromise pick shows "Not rated" and silently drops the "Compromise pick" signal, since `ResultDto.badge` is a single enum value, not a set. Minor, but worth knowing before relying on the compromise badge for QA.
+4. **Not fixed, flagged — likely production-impacting:** the configured Groq model (`app.groq.model` / `GROQ_MODEL`, defaulting to `llama-3.3-70b-versatile` in `application.properties`) returns `404 model_not_found` from Groq's real API right now — confirmed with a direct authenticated `curl` against `api.groq.com/openai/v1/chat/completions` using the project's real key. This isn't a sandbox artifact: it reproduces with real network access and a real key, so **every deployment using the current default is silently degrading to the generic templated explanation** (the graceful-fallback path masks it well, which is why it wasn't obvious). Current key's `/v1/models` no longer lists any `llama-3.3-*` id; available chat-capable models include `openai/gpt-oss-120b` and `openai/gpt-oss-20b`. Needs a deliberate pick, not a silent swap — flagging for a decision.
