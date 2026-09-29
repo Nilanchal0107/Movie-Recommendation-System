@@ -12,6 +12,8 @@ import SessionSetupPage from './pages/SessionSetupPage'
 import HandoffPage from './pages/HandoffPage'
 import PersonFormPage from './pages/PersonFormPage'
 import FindingPicksPage from './pages/FindingPicksPage'
+import ResultsPage from './pages/ResultsPage'
+import TitleDetailPage from './pages/TitleDetailPage'
 import ComingSoonPage from './pages/ComingSoonPage'
 
 export default function App() {
@@ -69,6 +71,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <FindingPicksPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/session/:id/results"
+            element={
+              <ProtectedRoute>
+                <ResultsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/session/:id/title/:titleId"
+            element={
+              <ProtectedRoute>
+                <TitleDetailPage />
               </ProtectedRoute>
             }
           />

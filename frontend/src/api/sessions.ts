@@ -68,3 +68,27 @@ export function submitSession(sessionId: number, people: PersonAnswerInput[]) {
     body: JSON.stringify({ people }),
   })
 }
+
+export function getMoreResults(sessionId: number) {
+  return apiRequest<SessionResultsResponse>(`/sessions/${sessionId}/more`, { method: 'POST' })
+}
+
+export function getSessionResults(sessionId: number) {
+  return apiRequest<SessionResultsResponse>(`/sessions/${sessionId}/results`)
+}
+
+export const MEDIA_TYPE_LABELS: Record<SessionMediaType, string> = {
+  movie: 'Movie',
+  series: 'Series',
+  either: 'Movie or series',
+}
+
+export const TIME_LIMIT_LABELS: Record<TimeLimit, string> = {
+  under_90: 'Under 90 min',
+  '90_120': '90–120 min',
+  '2_2.5': '2–2.5 hrs',
+  no_limit: 'No limit',
+  episode_or_two: 'An episode or two',
+  binge: 'A binge session',
+  new_show: 'A new show to follow for weeks',
+}

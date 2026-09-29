@@ -18,7 +18,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [ ] **Phase 7:** Frontend Design System & Common UI
 - [x] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
 - [x] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
-- [ ] **Phase 10:** Frontend Flows 8–9 (Results & Title Detail)
+- [x] **Phase 10:** Frontend Flows 8–9 (Results & Title Detail)
 - [ ] **Phase 11:** End-to-End Integration, Edge Cases & Verification
 
 ---
@@ -238,23 +238,25 @@ Also added: `SessionFlowContext` (mirrors `AuthContext`'s in-memory-only pattern
 ---
 
 ## Phase 10: Frontend Screens 8 to 9
-- [ ] **Screen 8: Results: Top 5 (`/session/:id/results`):**
-  - [ ] Header with session summary and attendee names.
-  - [ ] 5 recommendation cards in a single row:
-    - [ ] 2:3 poster image.
-    - [ ] Title, release year, runtime, certificate.
-    - [ ] Gold group match percentage.
-    - [ ] Colored score circle per attendee.
-    - [ ] 2-line AI generated explanation.
-    - [ ] Badges (`Compromise pick`, `Not rated`).
-  - [ ] "Show more" button fetching and displaying rank 6–10 in a second row.
-  - [ ] "Change answers" (returns to setup keeping data) and "Start over" buttons.
-- [ ] **Screen 9: Title Detail (`/session/:id/title/:titleId`):**
-  - [ ] Wide backdrop hero image.
-  - [ ] Poster, title, year, certification, runtime/seasons, overview.
-  - [ ] Top 5 cast list with headshot photos.
-  - [ ] "Why this pick" block: full AI explanation + breakdown line per attendee.
-  - [ ] "Back to results" button (Esc key support).
+- [x] **Screen 8: Results: Top 5 (`/session/:id/results`):**
+  - [x] Header with session summary and attendee names.
+  - [x] 5 recommendation cards in a single row:
+    - [x] 2:3 poster image.
+    - [x] Title, release year, runtime, certificate.
+    - [x] Gold group match percentage.
+    - [x] Colored score circle per attendee.
+    - [x] 2-line AI generated explanation.
+    - [x] Badges (`Compromise pick`, `Not rated`).
+  - [x] "Show more" button fetching and displaying rank 6–10 in a second row.
+  - [x] "Change answers" and "Start over" buttons — "Change answers" returns to `/session/new`; a prefilled setup form isn't wired up (`SessionSetupPage` doesn't read `SessionFlowContext` on mount), so answers aren't literally "kept" yet, same as the existing empty-state CTA in `FindingPicksPage`.
+- [x] **Screen 9: Title Detail (`/session/:id/title/:titleId`):**
+  - [x] Wide backdrop hero image.
+  - [x] Poster, title, year, certification, runtime, overview, genres.
+  - [x] Cast list with headshot photos (however many the backend returns — capped at 5 server-side per Phase 4).
+  - [x] "Why this pick" block: full AI explanation + one line per attendee. The backend doesn't return a genre/mood breakdown string per person (only a numeric score), so each line reads "Name: NN% match" rather than the wireframe's "matches Thrill and Hindi" — that phrasing would need a new backend field.
+  - [x] "Back to results" button (Esc key support) — both use `navigate(-1)`, which restores the Results page's already-fetched state instead of refetching.
+
+Also added: `getMoreResults`/`getSessionResults` to `api/sessions.ts` and `getTitleDetail` to `api/titles.ts` (endpoints existed on the backend since Phase 5 but had no frontend client yet). `SessionSetupInfo` (SessionFlowContext) gained a `timeLimit` field so the Results header can show "Movie · 90–120 min" on the fresh-submit path; `FindingPicksPage` now passes the `/submit` response via router state instead of clearing the session context immediately, so Results doesn't need a redundant fetch on the common path. Both new pages still fetch from `GET /sessions/:id/results` standalone (page refresh, direct link) rather than depending on that state. Verified with `tsc -b && vite build` (clean) and `oxlint` (clean, only pre-existing-style warnings shared with Phase 9's pages).
 
 ---
 

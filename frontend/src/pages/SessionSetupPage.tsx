@@ -68,7 +68,7 @@ export default function SessionSetupPage() {
         timeLimit: timeLimit!,
         occasion,
       })
-      begin({ sessionId: res.sessionId, mediaType: mediaType!, groupSize })
+      begin({ sessionId: res.sessionId, mediaType: mediaType!, groupSize, timeLimit: timeLimit! })
       navigate(groupSize > 1 ? `/session/${res.sessionId}/handoff/0` : `/session/${res.sessionId}/person/0`)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.')

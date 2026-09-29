@@ -11,7 +11,7 @@ export default function FindingPicksPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const { user } = useAuth()
-  const { setup, answers, clear } = useSessionFlow()
+  const { setup, answers } = useSessionFlow()
 
   const [stillWorking, setStillWorking] = useState(false)
   const [error, setError] = useState('')
@@ -49,8 +49,7 @@ export default function FindingPicksPage() {
           setEmpty(true)
           return
         }
-        navigate(`/session/${sessionId}/results`)
-        clear()
+        navigate(`/session/${sessionId}/results`, { state: { results: res } })
       })
       .catch((err) => {
         setError(err instanceof ApiError ? err.message : "Couldn't reach the movie database")

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import type { AgeBand, Intensity, SessionMediaType } from '../api/sessions'
+import type { AgeBand, Intensity, SessionMediaType, TimeLimit } from '../api/sessions'
 import type { TitleSearchResult } from '../api/titles'
 
 export interface PersonAnswerDraft {
@@ -18,6 +18,7 @@ export interface SessionSetupInfo {
   sessionId: number
   mediaType: SessionMediaType
   groupSize: number
+  timeLimit: TimeLimit
 }
 
 interface SessionFlowContextValue {
