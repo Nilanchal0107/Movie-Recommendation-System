@@ -293,3 +293,309 @@ p {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-hover);
 }
+
+/* ==========================================================================
+   Phase 7 — Shared Components
+   ========================================================================== */
+
+/* Button Spinner */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinReel 0.7s linear infinite;
+}
+
+/* Text Input */
+.text-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.text-input label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.text-input input {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.text-input input:focus-visible {
+  outline: none !important;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+.text-input-error input {
+  border-color: var(--color-error);
+}
+
+.text-input-error-msg {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+/* Stepper */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 0.6rem;
+}
+
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stepper-btn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stepper-value {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+/* Slider3Step */
+.slider-3step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slider-3step-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.slider-3step input[type='range'] {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+.slider-3step-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.slider-3step-ticks .active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* Title Search Picker */
+.title-search-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.title-search-picker > input {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+}
+
+.title-search-status {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.title-search-error {
+  color: var(--color-error);
+}
+
+.title-search-results {
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.title-search-results li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.title-search-results li:hover,
+.title-search-results li:focus-visible {
+  background-color: var(--color-surface-hover);
+}
+
+.title-search-results img {
+  width: 32px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.title-search-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.title-search-selected .chip button {
+  display: inline-flex;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Person Score Circles row (shared) */
+.scores-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Film Reel Spinner */
+.film-reel-spinner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.film-reel-spinner-label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.film-reel-spinner-sublabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* Navbar */
+.navbar {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar-brand {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.navbar-menu {
+  position: relative;
+}
+
+.navbar-avatar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.navbar-avatar-btn:hover {
+  border-color: var(--color-border);
+}
+
+.navbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.navbar-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.navbar-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.navbar-dropdown button:hover {
+  background: var(--color-surface-hover);
+}
