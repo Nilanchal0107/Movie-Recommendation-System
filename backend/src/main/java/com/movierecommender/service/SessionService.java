@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -49,6 +50,7 @@ public class SessionService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final MatchingEngineService matchingEngineService;
+    private final GroqExplanationService groqExplanationService;
 
     @Transactional
     public SessionStartResponse start(Long userId, SessionStartRequest request) {
@@ -93,7 +95,7 @@ public class SessionService {
         sessionPersonAnswerRepository.saveAll(people);
 
         List<MatchingEngineService.MatchResult> matches = matchingEngineService.match(session, people, hostEra, hostLovedTitleIds, Set.of());
-        persistResults(session, matches.stream().limit(5).toList(), 1);
+        persistResults(session, people, matches.stream().limit(5).toList(), 1);
 
         session.setStatus(SessionStatus.COMPLETED);
         sessionRepository.save(session);
@@ -115,7 +117,7 @@ public class SessionService {
         List<MatchingEngineService.MatchResult> matches = matchingEngineService.match(session, people, hostEra, hostLovedTitleIds, excludeTitleIds);
 
         int nextRank = sessionResultRepository.findBySessionIdOrderByRankAsc(sessionId).size() + 1;
-        persistResults(session, matches.stream().limit(5).toList(), nextRank);
+        persistResults(session, people, matches.stream().limit(5).toList(), nextRank);
 
         return buildResponse(session, people);
     }
@@ -127,7 +129,8 @@ public class SessionService {
         return buildResponse(session, people);
     }
 
-    private void persistResults(Session session, List<MatchingEngineService.MatchResult> matches, int startRank) {
+    private void persistResults(Session session, List<SessionPersonAnswer> people, List<MatchingEngineService.MatchResult> matches, int startRank) {
+        Map<Long, String> explanations = groqExplanationService.explain(matches, session, people);
         int rank = startRank;
         for (MatchingEngineService.MatchResult match : matches) {
             SessionResult unsaved = SessionResult.builder()
@@ -136,7 +139,7 @@ public class SessionService {
                     .rank(rank++)
                     .groupScore(match.groupScore())
                     .badge(resolveBadge(match))
-                    .aiExplanation(buildFallbackExplanation(match))
+                    .aiExplanation(explanations.get(match.title().getId()))
                     .build();
             SessionResult saved = sessionResultRepository.save(unsaved);
 
@@ -154,11 +157,6 @@ public class SessionService {
     private ResultBadge resolveBadge(MatchingEngineService.MatchResult match) {
         if (match.title().getCertificationBand() == null) return ResultBadge.NOT_RATED;
         return match.compromise() ? ResultBadge.COMPROMISE : ResultBadge.NONE;
-    }
-
-    // ponytail: placeholder one-liner until Phase 6 wires up GroqClient for real explanations
-    private String buildFallbackExplanation(MatchingEngineService.MatchResult match) {
-        return "A solid pick for the whole group, scoring " + match.groupScore() + " out of 100.";
     }
 
     private SessionResultsResponse buildResponse(Session session, List<SessionPersonAnswer> people) {

@@ -14,7 +14,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 3:** Authentication, Security & User Profile
 - [x] **Phase 4:** TMDB Integration & Local Title Caching
 - [x] **Phase 5:** Matching Engine & Misery Algorithm
-- [ ] **Phase 6:** Groq LLM Concurrent Integration
+- [x] **Phase 6:** Groq LLM Concurrent Integration
 - [ ] **Phase 7:** Frontend Design System & Common UI
 - [ ] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
 - [ ] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
@@ -163,10 +163,10 @@ Note: real Groq explanations are Phase 6's job; `aiExplanation` currently return
 ---
 
 ## Phase 6: Groq LLM Concurrent Integration
-- [ ] Build `GroqClient` with API key and configurable model (`llama-3.3-70b-versatile`).
-- [ ] Construct prompt for each title containing title, genres, overview, occasion, attendee names, and individual score highlights.
-- [ ] Dispatch all 5 Groq prompts in parallel (`CompletableFuture.allOf` / WebClient async).
-- [ ] Implement graceful fallback: if Groq is unreachable or times out, provide a clean programmatic one-liner reason instead of failing the request.
+- [x] Build `GroqClient` with API key and configurable model (`llama-3.3-70b-versatile`).
+- [x] Construct prompt for each title containing title, genres, occasion, attendee names, and individual score highlights.
+- [x] Dispatch all 5 Groq prompts in parallel (reactive `Flux.merge` over per-title `Mono<String>` calls, collected together).
+- [x] Implement graceful fallback: if Groq is unreachable or times out (10s), each call individually degrades to the programmatic one-liner instead of failing the request.
 
 ---
 
