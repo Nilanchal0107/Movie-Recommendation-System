@@ -16,7 +16,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 5:** Matching Engine & Misery Algorithm
 - [x] **Phase 6:** Groq LLM Concurrent Integration
 - [ ] **Phase 7:** Frontend Design System & Common UI
-- [ ] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
+- [x] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
 - [ ] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
 - [ ] **Phase 10:** Frontend Flows 8–9 (Results & Title Detail)
 - [ ] **Phase 11:** End-to-End Integration, Edge Cases & Verification
@@ -186,28 +186,30 @@ Note: real Groq explanations are Phase 6's job; `aiExplanation` currently return
 ---
 
 ## Phase 8: Frontend Screens 1 to 4
-- [ ] **Screen 1: Sign up / Log in / Password Reset (`/login`, `/signup`, `/forgot-password`, `/reset-password`):**
-  - [ ] Split screen layout: blurred poster backdrop on left, card on right.
-  - [ ] Sign up tab with password match validation.
-  - [ ] Log in tab with redirect to home/profile.
-  - [ ] Forgot password flow with "Check your inbox" screen.
-  - [ ] Reset password page with 30-min token parameter.
-- [ ] **Screen 2: Profile Setup Wizard (`/profile/setup`):**
-  - [ ] Progress bar for 3 steps.
-  - [ ] Step 1 (About You): pre-filled display name, birth year dropdown (P2).
-  - [ ] Step 2 (Languages): P4 languages chips + search, P5 subtitles Yes/No toggle.
-  - [ ] Step 3 (Taste): P6 favorite genres (up to 5), P7 hard-no genres, P8 loved titles search picker (up to 5 optional), P9 era preference toggle.
-  - [ ] State preservation on Back / Next.
-- [ ] **Screen 3: Home (`/`):**
-  - [ ] Greeting header ("Hi [Name]").
-  - [ ] Prominent gold CTA: "Find something to watch".
-  - [ ] Profile summary card with "Edit" button.
-- [ ] **Screen 4: Session Setup (`/session/new`):**
-  - [ ] S1: 3 cards (Movie, Series, Either).
-  - [ ] S2: Stepper (1 to 8 viewers).
-  - [ ] S3: Dynamic time limit chips (S3a movie runtimes vs S3b series duration).
-  - [ ] S4: Occasion chips (Friends hangout, Date night, Family time, Solo chill).
-  - [ ] "Start" button navigating to Handoff (group) or Person Form (solo).
+- [x] **Screen 1: Sign up / Log in / Password Reset (`/login`, `/signup`, `/forgot-password`, `/reset-password`):**
+  - [x] Split screen layout: blurred poster backdrop on left, card on right.
+  - [x] Sign up tab with password match validation.
+  - [x] Log in tab with redirect to home/profile.
+  - [x] Forgot password flow with "Check your inbox" screen.
+  - [x] Reset password page with 30-min token parameter.
+- [x] **Screen 2: Profile Setup Wizard (`/profile/setup`):**
+  - [x] Progress bar for 3 steps.
+  - [x] Step 1 (About You): pre-filled display name (read-only — no backend endpoint exists to rename the account), birth year dropdown (P2).
+  - [x] Step 2 (Languages): P4 languages chips + free-text add, P5 subtitles Yes/No toggle.
+  - [x] Step 3 (Taste): P6 favorite genres (up to 5), P7 hard-no genres, P8 loved titles search picker (up to 5 optional, movie/series toggle), P9 era preference 3-step choice (`Slider3Step` generalized to take arbitrary steps, reused from Phase 7).
+  - [x] State preservation on Back / Next; prefills from `GET /profile` when reopened via "Edit profile".
+- [x] **Screen 3: Home (`/`):**
+  - [x] Greeting header ("Hi [Name]").
+  - [x] Prominent gold CTA: "Find something to watch".
+  - [x] Profile summary card with "Edit" button.
+- [x] **Screen 4: Session Setup (`/session/new`):**
+  - [x] S1: 3 cards (Movie, Series, Either).
+  - [x] S2: Stepper (1 to 8 viewers).
+  - [x] S3: Dynamic time limit chips (S3a movie runtimes vs S3b series duration; "Either" shows both).
+  - [x] S4: Occasion chips (Friends hangout, Date night, Family time, Solo chill), deselectable.
+  - [x] "Start" button navigating to Handoff (group) or Person Form (solo) — routes are stubbed with a "coming soon" placeholder until Phase 9 builds those screens.
+
+Also added: `react-router-dom` for client routing, an `AuthContext` (in-memory token/user, matching the TRD's "no localStorage" rule), and `api/auth.ts` · `api/profile.ts` · `api/genres.ts` · `api/sessions.ts` API modules. All verified against the running backend with `curl` (signup, login, `GET/PUT /profile`, `GET /genres`, `POST /sessions/start`) — request/response shapes match exactly.
 
 ---
 
