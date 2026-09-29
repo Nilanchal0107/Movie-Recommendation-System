@@ -17,7 +17,7 @@ Specification Documents: [PRD](../docs/prd.md) · [TRD](../docs/trd.md) · [Data
 - [x] **Phase 6:** Groq LLM Concurrent Integration
 - [ ] **Phase 7:** Frontend Design System & Common UI
 - [x] **Phase 8:** Frontend Flows 1–4 (Auth, Profile, Home, Session Setup)
-- [ ] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
+- [x] **Phase 9:** Frontend Flows 5–7 (Handoff, Person Form, Finding Picks)
 - [ ] **Phase 10:** Frontend Flows 8–9 (Results & Title Detail)
 - [ ] **Phase 11:** End-to-End Integration, Edge Cases & Verification
 
@@ -214,24 +214,26 @@ Also added: `react-router-dom` for client routing, an `AuthContext` (in-memory t
 ---
 
 ## Phase 9: Frontend Screens 5 to 7
-- [ ] **Screen 5: Handoff Screen (`/session/:id/handoff`):**
-  - [ ] Centered full-screen dark privacy wall.
-  - [ ] "Pass the laptop to person X of N".
-  - [ ] Numbered progress dots.
-  - [ ] Gold "I'm ready" button (triggers on Enter).
-  - [ ] "Go back" link to allow fixing previous person's answers.
-- [ ] **Screen 6: Person's Form (`/session/:id/person/:index`):**
-  - [ ] Host goes first (`personIndex = 0`), pre-filled with profile answers.
-  - [ ] Solo mode: skip Q1 (Name) and Q2 (Age Band).
-  - [ ] Questions Q1 to Q8 with constraints (Q3 max 2 chips, Q4 max 3 chips, Q7 slider, Q8 title search picker + Skip).
-  - [ ] Client validation: red outline and auto-scroll to missing required inputs.
-  - [ ] Answers hidden immediately upon clicking "Done".
-- [ ] **Screen 7: Finding Picks (`/session/:id/loading`):**
-  - [ ] Centered message: "Matching N people's answers...".
-  - [ ] Film-reel loading animation.
-  - [ ] After 10s: display "Still working...".
-  - [ ] Error state with Retry CTA on failure.
-  - [ ] Empty state: "Nothing fits everyone tonight" identifying the most restrictive filter with loosen CTA.
+- [x] **Screen 5: Handoff Screen (`/session/:id/handoff/:index`):**
+  - [x] Centered full-screen dark privacy wall.
+  - [x] "Pass the laptop to person X of N".
+  - [x] Numbered progress dots.
+  - [x] Gold "I'm ready" button (autofocused, so Enter triggers it).
+  - [x] "Go back" link to allow fixing previous person's answers.
+- [x] **Screen 6: Person's Form (`/session/:id/person/:index`):**
+  - [x] Host goes first (`personIndex = 0`), pre-filled with profile answers (name, favourite/never-want genres capped to Q4's 3, languages).
+  - [x] Solo mode: skip Q1 (Name) and Q2 (Age Band).
+  - [x] Questions Q1 to Q8 with constraints (Q3 max 2 chips, Q4 max 3 chips, Q7 slider defaulting to Balanced, Q8 title search picker + Skip).
+  - [x] Client validation: red error text and auto-scroll to the first missing required section (name, age band, mood, or language).
+  - [x] Answers held only in a new `SessionFlowContext` (frontend memory), never sent until the last person's "Done" triggers `/submit`.
+- [x] **Screen 7: Finding Picks (`/session/:id/loading`):**
+  - [x] Centered message: "Matching N people's answers...".
+  - [x] Film-reel loading animation (reused `FilmReelSpinner` from Phase 7).
+  - [x] After 10s: display "Still working...".
+  - [x] Error state with Retry CTA on failure (re-runs the same `/submit` call).
+  - [x] Empty state: "Nothing fits everyone tonight" with a generic loosen-filters CTA back to Session setup — the API doesn't return which filter was most restrictive, so that specific detail from the wireframe isn't shown.
+
+Also added: `SessionFlowContext` (mirrors `AuthContext`'s in-memory-only pattern) to carry the session's `mediaType`/`groupSize` and each person's draft answers across the handoff loop without persisting anything to storage — consistent with the "never sent until everyone's done" rule and the app's existing no-persistence-on-refresh behavior. Extracted `groupGenresByName` (genre dedup-by-name-across-movie/tv) and `POPULAR_LANGUAGES` out of `ProfileSetupPage` into `utils/genres.ts` and `utils/languages.ts` so the person form could reuse them instead of duplicating. Verified with `tsc -b && vite build` (clean) and `oxlint` (clean, pre-existing-style warnings only), plus a live signup → profile → session start → `/submit` round trip against the running backend — the request was accepted and reached the TMDB call; this sandbox has no outbound internet, so the full match itself couldn't be exercised (`TMDB_UNREACHABLE`, which is exactly the error state Screen 7 is built to show).
 
 ---
 

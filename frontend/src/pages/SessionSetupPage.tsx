@@ -5,6 +5,7 @@ import Chip from '../components/Chip'
 import Stepper from '../components/Stepper'
 import { ApiError } from '../api/client'
 import { startSession, type Occasion, type SessionMediaType, type TimeLimit } from '../api/sessions'
+import { useSessionFlow } from '../context/SessionFlowContext'
 
 const MEDIA_TYPES: { value: SessionMediaType; label: string }[] = [
   { value: 'movie', label: 'Movie' },
@@ -34,6 +35,7 @@ const OCCASIONS: { value: Occasion; label: string }[] = [
 
 export default function SessionSetupPage() {
   const navigate = useNavigate()
+  const { begin } = useSessionFlow()
   const [mediaType, setMediaType] = useState<SessionMediaType | null>(null)
   const [groupSize, setGroupSize] = useState(1)
   const [timeLimit, setTimeLimit] = useState<TimeLimit | null>(null)
@@ -66,7 +68,8 @@ export default function SessionSetupPage() {
         timeLimit: timeLimit!,
         occasion,
       })
-      navigate(groupSize > 1 ? `/session/${res.sessionId}/handoff` : `/session/${res.sessionId}/person/0`)
+      begin({ sessionId: res.sessionId, mediaType: mediaType!, groupSize })
+      navigate(groupSize > 1 ? `/session/${res.sessionId}/handoff/0` : `/session/${res.sessionId}/person/0`)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.')
       setStarting(false)

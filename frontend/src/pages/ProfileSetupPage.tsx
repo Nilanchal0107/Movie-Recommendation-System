@@ -10,20 +10,8 @@ import { getGenres, type Genre } from '../api/genres'
 import { getProfile, updateProfile, type EraPreference } from '../api/profile'
 import type { TitleSearchResult } from '../api/titles'
 import { useAuth } from '../context/AuthContext'
-
-const POPULAR_LANGUAGES: { code: string; label: string }[] = [
-  { code: 'hi', label: 'Hindi' },
-  { code: 'en', label: 'English' },
-  { code: 'ta', label: 'Tamil' },
-  { code: 'te', label: 'Telugu' },
-  { code: 'kn', label: 'Kannada' },
-  { code: 'ml', label: 'Malayalam' },
-  { code: 'bn', label: 'Bengali' },
-  { code: 'mr', label: 'Marathi' },
-  { code: 'pa', label: 'Punjabi' },
-  { code: 'gu', label: 'Gujarati' },
-  { code: 'ur', label: 'Urdu' },
-]
+import { groupGenresByName, type GenreGroup } from '../utils/genres'
+import { POPULAR_LANGUAGES } from '../utils/languages'
 
 const ERA_STEPS = [
   { value: 'mostly_newer' as EraPreference, label: 'Mostly newer' },
@@ -33,24 +21,6 @@ const ERA_STEPS = [
 
 const CURRENT_YEAR = new Date().getFullYear()
 const BIRTH_YEARS = Array.from({ length: CURRENT_YEAR - 1930 + 1 }, (_, i) => CURRENT_YEAR - i)
-
-interface GenreGroup {
-  name: string
-  ids: number[]
-  representativeId: number
-}
-
-function groupGenresByName(genres: Genre[]): GenreGroup[] {
-  const byName = new Map<string, number[]>()
-  for (const g of genres) {
-    const ids = byName.get(g.name) ?? []
-    ids.push(g.id)
-    byName.set(g.name, ids)
-  }
-  return Array.from(byName.entries())
-    .map(([name, ids]) => ({ name, ids, representativeId: ids[0] }))
-    .sort((a, b) => a.name.localeCompare(b.name))
-}
 
 export default function ProfileSetupPage() {
   const navigate = useNavigate()

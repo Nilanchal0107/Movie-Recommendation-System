@@ -195,6 +195,12 @@
   gap: 0.9rem;
 }
 
+.wizard > form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
 .wizard-label {
   font-size: 0.875rem;
   color: var(--color-text-muted);
@@ -291,4 +297,89 @@
   border-color: var(--color-accent);
   color: var(--color-accent);
   box-shadow: var(--shadow-gold-glow);
+}
+
+/* ==========================================================================
+   Phase 9 — Handoff, Person Form, Finding Picks
+   ========================================================================== */
+
+.handoff-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.handoff-message {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  letter-spacing: 0.05em;
+}
+
+.handoff-dots {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.handoff-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.handoff-dot.done {
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent);
+}
+
+.handoff-dot.current {
+  background: var(--color-accent);
+}
+
+.handoff-back-link {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.handoff-back-link:hover {
+  color: var(--color-text);
+}
+
+/* Person form */
+.person-form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.person-form-progress-track {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.person-form-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width var(--transition-normal);
+}
+
+/* Finding picks */
+.finding-picks-screen {
+  min-height: 60vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
