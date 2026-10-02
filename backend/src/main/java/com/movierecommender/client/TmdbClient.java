@@ -36,7 +36,7 @@ public class TmdbClient {
     }
 
     public JsonNode tvDetails(long tmdbId) {
-        return get("/tv/" + tmdbId, b -> b.queryParam("append_to_response", "content_ratings,credits,keywords"));
+        return get("/tv/" + tmdbId, b -> b.queryParam("append_to_response", "content_ratings,credits,keywords,external_ids"));
     }
 
     public JsonNode discoverMovies(Map<String, String> params) {
@@ -58,8 +58,8 @@ public class TmdbClient {
                     .uri(b -> customizer.apply(b.path(path)).queryParam("api_key", apiKey).build())
                     .retrieve()
                     .bodyToMono(JsonNode.class)
-                    .block();
-        } catch (WebClientException e) {
+                    .block(java.time.Duration.ofSeconds(15));
+        } catch (RuntimeException e) {
             throw new ApiException(HttpStatus.BAD_GATEWAY, "TMDB_UNREACHABLE", "Couldn't reach the movie database");
         }
     }

@@ -46,6 +46,7 @@ public class TitleController {
                 t.getId(), t.getTmdbId(), t.getMediaType(), t.getTitle(), t.getOverview(),
                 t.getPosterPath(), t.getBackdropPath(), t.getReleaseDate(), t.getRuntimeMinutes(), t.getSeriesStatus(),
                 genreNames, t.getCast(), t.getCertificationRaw(), t.getCertificationBand(),
-                t.getImdbRating(), t.getRottenTomatoesRating(), t.getMetacriticRating());
+                t.getImdbRating(), t.getRottenTomatoesRating(), t.getMetacriticRating(),
+                t.getImdbId(), t.getVoteAverage());
     }
 }

@@ -31,7 +31,8 @@ public class GroqClient {
                 "model", model,
                 "messages", List.of(Map.of("role", "user", "content", prompt)),
                 "temperature", 0.7,
-                "max_tokens", 120
+                "max_tokens", 200,
+                "reasoning_effort", "low"
         );
         return webClient.post()
                 .uri("/chat/completions")

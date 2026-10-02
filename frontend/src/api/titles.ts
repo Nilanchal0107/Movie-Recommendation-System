@@ -44,6 +44,8 @@ export interface TitleDetail {
   imdbRating: number | null
   rottenTomatoesRating: number | null
   metacriticRating: number | null
+  imdbId: string | null
+  tmdbRating: number | null
 }
 
 export function getTitleDetail(id: number) {

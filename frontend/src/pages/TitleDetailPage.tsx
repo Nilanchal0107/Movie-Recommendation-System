@@ -96,11 +96,29 @@ export default function TitleDetailPage() {
             {detail.posterPath && <img src={`${TMDB_POSTER_LARGE}${detail.posterPath}`} alt="" />}
           </div>
           <div className="title-detail-info">
-            <h1>{detail.title}</h1>
+            <h1>
+              {detail.imdbId ? (
+                <a href={`https://www.imdb.com/title/${detail.imdbId}/`} target="_blank" rel="noopener noreferrer">
+                  {detail.title}
+                </a>
+              ) : (
+                detail.title
+              )}
+            </h1>
             <p className="result-card-meta">
               {year} · {cert} · {runtime}
             </p>
             <p style={{ color: 'var(--color-text-muted)' }}>{detail.genreNames.join(', ')}</p>
+            <p className="result-card-meta">
+              {[
+                detail.imdbRating != null && `IMDb ${detail.imdbRating}/10`,
+                detail.rottenTomatoesRating != null && `Rotten Tomatoes ${detail.rottenTomatoesRating}%`,
+                detail.metacriticRating != null && `Metacritic ${detail.metacriticRating}`,
+                detail.imdbRating == null && detail.tmdbRating != null && `TMDB ${Number(detail.tmdbRating).toFixed(1)}/10`,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
             <p>{detail.overview}</p>
           </div>
         </div>
@@ -110,10 +128,16 @@ export default function TitleDetailPage() {
             <h3>Cast</h3>
             <div className="title-detail-cast">
               {detail.cast.map((c) => (
-                <div key={c.name} className="title-detail-cast-member">
-                  {c.photoUrl && <img src={c.photoUrl} alt="" />}
+                <a
+                  key={c.name}
+                  className="title-detail-cast-member"
+                  href={`https://www.imdb.com/find/?q=${encodeURIComponent(c.name)}&s=nm`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {c.photoUrl && <img src={`${TMDB_POSTER_LARGE}${c.photoUrl}`} alt="" />}
                   <span>{c.name}</span>
-                </div>
+                </a>
               ))}
             </div>
           </section>

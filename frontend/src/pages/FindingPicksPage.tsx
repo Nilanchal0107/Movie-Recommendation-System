@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/Button'
 import FilmReelSpinner from '../components/FilmReelSpinner'
@@ -19,9 +19,13 @@ export default function FindingPicksPage() {
   const [attempt, setAttempt] = useState(0)
 
   const sessionId = setup?.sessionId
+  const startedKey = useRef('') // StrictMode runs effects twice in dev; submit once per session/attempt
 
   useEffect(() => {
     if (!sessionId) return
+    const key = `${sessionId}:${attempt}`
+    if (startedKey.current === key) return
+    startedKey.current = key
     setError('')
     setEmpty(false)
     setStillWorking(false)

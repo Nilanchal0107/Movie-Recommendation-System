@@ -26,5 +26,7 @@ public record TitleDetailResponse(
         CertificationBand certificationBand,
         BigDecimal imdbRating,
         Integer rottenTomatoesRating,
-        Integer metacriticRating
+        Integer metacriticRating,
+        String imdbId,
+        BigDecimal tmdbRating
 ) {}

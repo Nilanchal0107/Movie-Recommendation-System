@@ -47,7 +47,6 @@ public class MatchingEngineService {
 
     private static final int[] MISERY_THRESHOLDS = {40, 30, 20};
     private static final int MIN_SURVIVORS_TARGET = 5;
-    private static final int REPLENISH_BELOW = 50;
 
     private static final Map<String, List<String>> MOVIE_MOOD_GENRES = Map.of(
             "Laugh", List.of("Comedy", "Animation"),
@@ -117,6 +116,12 @@ public class MatchingEngineService {
             hardNoNames.addAll(resolveNames(p.getHardNoGenres(), genreNameById));
         }
 
+        Set<String> wantedNames = new HashSet<>();
+        for (SessionPersonAnswer p : people) {
+            wantedNames.addAll(resolveNames(p.getGenresUpFor(), genreNameById));
+        }
+        wantedNames.removeAll(hardNoNames);
+
         boolean anyLight = people.stream().anyMatch(p -> p.getIntensity() == Intensity.LIGHT);
         boolean anyIntense = people.stream().anyMatch(p -> p.getIntensity() == Intensity.INTENSE);
         Set<Long> intensityMarkerIds = keywordRepository.findByIsIntensityMarkerTrue().stream()
@@ -130,10 +135,10 @@ public class MatchingEngineService {
         List<Title> pool = new ArrayList<>();
         for (MediaType mediaType : resolveMediaTypes(session.getMediaType())) {
             List<Title> candidates = titleRepository.findCandidates(mediaType, allowedBands, languages);
-            if (candidates.size() < REPLENISH_BELOW) {
-                replenish(mediaType, session, languages, hardNoNames, anyLight, anyIntense);
-                candidates = titleRepository.findCandidates(mediaType, allowedBands, languages);
-            }
+            // Always replenish: the cache is shared across sessions, so "enough titles" doesn't mean enough of the *wanted genres*.
+            // Cheap after the first run (already-hydrated titles are skipped).
+            replenish(mediaType, session, languages, hardNoNames, wantedNames, anyLight, anyIntense);
+            candidates = titleRepository.findCandidates(mediaType, allowedBands, languages);
             for (Title t : candidates) {
                 if (seenIds.add(t.getId())) pool.add(t);
             }
@@ -171,7 +176,7 @@ public class MatchingEngineService {
 
         return chosen.stream()
                 .sorted(Comparator.comparing(ScoredTitle::groupScore).reversed())
-                .map(s -> new MatchResult(s.title(), s.groupScore(), s.personScores(),
+                .map(s -> new MatchResult(s.title(), s.groupScore().min(BigDecimal.valueOf(100)), s.personScores(),
                         s.minScore().compareTo(BigDecimal.valueOf(40)) < 0))
                 .toList();
     }
@@ -296,7 +301,7 @@ public class MatchingEngineService {
     }
 
     private void replenish(MediaType mediaType, Session session, List<String> languages, Set<String> hardNoNames,
-                            boolean anyLight, boolean anyIntense) {
+                            Set<String> wantedNames, boolean anyLight, boolean anyIntense) {
         Map<String, String> params = new HashMap<>();
         params.put("with_original_language", String.join("|", languages));
         params.put("vote_count.gte", "20"); // ponytail: quality floor guess, tune after testing
@@ -308,6 +313,13 @@ public class MatchingEngineService {
         if (!withoutGenreTmdbIds.isEmpty()) {
             params.put("without_genres", withoutGenreTmdbIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
         }
+
+        // Genre names differ between movie and TV lists, so map by name to this media type's TMDB ids ("|" = any of).
+        String withGenres = genreRepository.findByMediaType(mediaType).stream()
+                .filter(g -> wantedNames.contains(g.getName()))
+                .map(g -> String.valueOf(g.getTmdbGenreId()))
+                .collect(Collectors.joining("|"));
+        if (!withGenres.isBlank()) params.put("with_genres", withGenres);
 
         if (anyLight ^ anyIntense) {
             String markerTmdbIds = keywordRepository.findByIsIntensityMarkerTrue().stream()

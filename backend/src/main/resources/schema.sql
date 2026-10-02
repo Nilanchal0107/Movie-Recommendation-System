@@ -134,3 +134,9 @@ CREATE TABLE IF NOT EXISTS session_result_person_scores (
     CONSTRAINT fk_result_person_scores_result FOREIGN KEY (session_result_id) REFERENCES session_results(id) ON DELETE CASCADE,
     UNIQUE KEY uk_result_person (session_result_id, person_index)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Added after v1 schema: idempotent column add (MySQL has no ADD COLUMN IF NOT EXISTS)
+SET @add_imdb_id = (SELECT IF(COUNT(*) = 0, 'ALTER TABLE titles ADD COLUMN imdb_id VARCHAR(20) NULL', 'SELECT 1') FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'titles' AND column_name = 'imdb_id');
+PREPARE add_imdb_id_stmt FROM @add_imdb_id;
+EXECUTE add_imdb_id_stmt;
+DEALLOCATE PREPARE add_imdb_id_stmt;

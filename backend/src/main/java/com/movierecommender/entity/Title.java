@@ -97,6 +97,9 @@ public class Title {
     @Column(name = "cast", columnDefinition = "JSON")
     private List<CastMember> cast = new ArrayList<>();
 
+    @Column(name = "imdb_id", length = 20)
+    private String imdbId;
+
     @Column(name = "imdb_rating", precision = 3, scale = 1)
     private BigDecimal imdbRating;
 

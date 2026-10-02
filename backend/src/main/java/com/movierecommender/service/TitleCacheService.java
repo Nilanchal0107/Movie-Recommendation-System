@@ -1,6 +1,7 @@
 package com.movierecommender.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.movierecommender.client.OmdbClient;
 import com.movierecommender.client.TmdbClient;
 import com.movierecommender.entity.Title;
 import com.movierecommender.entity.enums.MediaType;
@@ -34,6 +35,7 @@ public class TitleCacheService {
     private final TitleRepository titleRepository;
     private final GenreRepository genreRepository;
     private final KeywordRepository keywordRepository;
+    private final OmdbClient omdbClient;
 
     @Transactional
     public List<Title> searchAndCache(String query, MediaType mediaType) {
@@ -51,10 +53,13 @@ public class TitleCacheService {
         JsonNode response = mediaType == MediaType.MOVIE ? tmdbClient.discoverMovies(params) : tmdbClient.discoverTv(params);
         List<Title> results = new ArrayList<>();
         for (JsonNode r : response.path("results")) {
-            Title title = upsertBasic(r, mediaType);
-            fetchFullDetails(title);
-            results.add(title);
+            results.add(upsertBasic(r, mediaType));
         }
+        // Skip titles already hydrated and fetch the rest concurrently: sequential calls (~1s each) caused request timeouts.
+        List<Title> missing = results.stream().filter(t -> t.getOverview() == null).toList();
+        Map<Long, JsonNode> details = missing.parallelStream().collect(java.util.stream.Collectors.toMap(
+                Title::getId, t -> fetchDetailJson(t)));
+        missing.forEach(t -> applyFullDetails(t, details.get(t.getId())));
         return results;
     }
 
@@ -62,8 +67,16 @@ public class TitleCacheService {
     public Title getDetail(Long id) {
         Title title = titleRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "TITLE_NOT_FOUND", "Title not found."));
-        if (title.getOverview() == null) {
+        if (title.getOverview() == null || title.getImdbId() == null) {
             fetchFullDetails(title);
+        }
+        if (title.getImdbId() != null && title.getImdbRating() == null) {
+            omdbClient.fetch(title.getImdbId()).ifPresent(r -> {
+                title.setImdbRating(r.imdb());
+                title.setRottenTomatoesRating(r.rottenTomatoes());
+                title.setMetacriticRating(r.metacritic());
+                titleRepository.save(title);
+            });
         }
         return title;
     }
@@ -74,6 +87,7 @@ public class TitleCacheService {
                 .orElseGet(() -> Title.builder().tmdbId(tmdbId).mediaType(mediaType).build());
         title.setTitle(mediaType == MediaType.MOVIE ? textOrNull(r, "title") : textOrNull(r, "name"));
         title.setPosterPath(textOrNull(r, "poster_path"));
+        title.setOriginalLanguage(textOrNull(r, "original_language"));
         title.setReleaseDate(parseDate(textOrNull(r, mediaType == MediaType.MOVIE ? "release_date" : "first_air_date")));
         title.setVoteAverage(bigDecimalOrNull(r.path("vote_average")));
         title.setVoteCount(r.path("vote_count").asInt(0));
@@ -81,13 +95,21 @@ public class TitleCacheService {
     }
 
     private void fetchFullDetails(Title title) {
+        applyFullDetails(title, fetchDetailJson(title));
+    }
+
+    private JsonNode fetchDetailJson(Title title) {
+        return title.getMediaType() == MediaType.MOVIE ? tmdbClient.movieDetails(title.getTmdbId()) : tmdbClient.tvDetails(title.getTmdbId());
+    }
+
+    private void applyFullDetails(Title title, JsonNode detail) {
         boolean isMovie = title.getMediaType() == MediaType.MOVIE;
-        JsonNode detail = isMovie ? tmdbClient.movieDetails(title.getTmdbId()) : tmdbClient.tvDetails(title.getTmdbId());
 
         title.setTitle(textOrNull(detail, isMovie ? "title" : "name"));
         title.setOverview(detail.path("overview").asText(""));
         title.setPosterPath(textOrNull(detail, "poster_path"));
         title.setBackdropPath(textOrNull(detail, "backdrop_path"));
+        title.setOriginalLanguage(textOrNull(detail, "original_language"));
         title.setVoteAverage(bigDecimalOrNull(detail.path("vote_average")));
         title.setVoteCount(detail.path("vote_count").asInt(0));
         title.setGenreIds(mapGenreIds(detail.path("genres"), title.getMediaType()));
@@ -96,6 +118,7 @@ public class TitleCacheService {
 
         if (isMovie) {
             title.setReleaseDate(parseDate(textOrNull(detail, "release_date")));
+            title.setImdbId(textOrNull(detail, "imdb_id"));
             JsonNode runtime = detail.path("runtime");
             title.setRuntimeMinutes(runtime.isInt() ? runtime.asInt() : null);
             CertificationMapper.Result cert = CertificationMapper.resolveMovie(detail.path("release_dates"));
@@ -103,6 +126,7 @@ public class TitleCacheService {
             title.setCertificationBand(cert.band());
         } else {
             title.setReleaseDate(parseDate(textOrNull(detail, "first_air_date")));
+            title.setImdbId(textOrNull(detail.path("external_ids"), "imdb_id"));
             JsonNode episodeRuntimes = detail.path("episode_run_time");
             title.setRuntimeMinutes(episodeRuntimes.isArray() && !episodeRuntimes.isEmpty() ? episodeRuntimes.get(0).asInt() : null);
             String status = detail.path("status").asText("");

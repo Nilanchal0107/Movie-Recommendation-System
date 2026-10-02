@@ -555,3 +555,14 @@
   gap: 0.35rem;
   color: var(--color-text-muted);
 }
+
+.title-detail-cast-member,
+.title-detail-info h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.title-detail-cast-member:hover span,
+.title-detail-info h1 a:hover {
+  text-decoration: underline;
+}

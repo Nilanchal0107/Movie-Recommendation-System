@@ -69,6 +69,9 @@ public class SessionService {
     @Transactional
     public SessionResultsResponse submit(Long userId, Long sessionId, SessionSubmitRequest request) {
         Session session = getOwnedSession(userId, sessionId);
+        if (session.getStatus() == SessionStatus.COMPLETED) {
+            return getResults(userId, sessionId);
+        }
         if (request.people().size() != session.getGroupSize()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Number of people must match the session's group size.");
         }
